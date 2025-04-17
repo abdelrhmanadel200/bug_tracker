@@ -6,7 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Site configuration
 define('SITE_NAME', 'BugTracker');
-define('SITE_URL', 'http://localhost/bug_tracker');
+define('SITE_URL', 'https://abdelrhmanadel200.github.io/bug_tracker');
+
 
 // File upload configuration
 define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB

@@ -4,8 +4,7 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // Check if admin is logged in
-session_start();
-if (!is_logged_in() || !is_admin()) {ر
+if (!is_logged_in() || !is_admin()) {
     redirect('../login.php');
 }
 

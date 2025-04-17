@@ -4,7 +4,6 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // Check if admin is logged in
-session_start();
 if (!is_logged_in() || !is_admin()) {
     redirect('../login.php');
 }
@@ -233,8 +232,20 @@ switch ($report_type) {
         exit();
 }
 
-include '../includes/admin_header.php';
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bugs - BugTracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <?php include '../includes/admin_header.php'; ?>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -1146,4 +1157,9 @@ include '../includes/admin_header.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/main.js"></script>
 
-<?php include '../includes/footer.php'; ?>
+    <?php include '../includes/footer.php'; ?>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
