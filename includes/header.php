@@ -22,9 +22,23 @@
                     <li class="nav-item">
                         <a class="nav-link" href="contact.php">Contact</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="login.php">Login</a>
-                    </li>
+                    <?php
+                    if (is_logged_in()) {
+                        if (is_admin()) {
+                            redirect('admin/dashboard.php');
+                        } else if (is_staff()) {
+                            redirect('staff/dashboard.php');
+                        } else if (is_customer()) {
+                            redirect('customer/dashboard.php');
+                        }
+                    } else {
+                    ?>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="login.php">Login</a>
+                        </li>
+                    <?php
+                    }
+                    ?>
                 </ul>
             </div>
         </div>

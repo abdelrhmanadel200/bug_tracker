@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Log the activity
                 $user_id = $_SESSION['user_id'];
                 $action = "Updated project: $name (ID: $project_id)";
-                log_activity($conn, $user_id, null, $action);
+                // log_activity($conn, $user_id, null, $action);
                 
                 header('Location: projects.php?success=updated');
                 exit();

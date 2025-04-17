@@ -7,51 +7,29 @@ if (!is_logged_in() || !is_staff()) {
     redirect('../login.php');
 }
 
+// Get user ID
 $user_id = $_SESSION['user_id'];
 
-// Get assigned bugs
-$sql = "SELECT b.*, p.name as project_name, u.fullname as reported_by_name 
-        FROM bugs b 
-        JOIN projects p ON b.project_id = p.id 
-        JOIN users u ON b.reported_by = u.id 
-        WHERE b.assigned_to = ? AND b.status NOT IN (?, ?)
-        ORDER BY 
-            CASE 
-                WHEN b.priority = ? THEN 1
-                WHEN b.priority = ? THEN 2
-                WHEN b.priority = ? THEN 3
-                WHEN b.priority = ? THEN 4
-                ELSE 5
-            END,
-            b.created_at DESC";
-$stmt = $conn->prepare($sql);
-$closed = STATUS_CLOSED;
-$resolved = STATUS_RESOLVED;
-$critical = PRIORITY_CRITICAL;
-$high = PRIORITY_HIGH;
-$medium = PRIORITY_MEDIUM;
-$low = PRIORITY_LOW;
-$stmt->bind_param("issssss", $user_id, $closed, $resolved, $critical, $high, $medium, $low);
-$stmt->execute();
-$assigned_bugs = $stmt->get_result();
-
-// Get total assigned bugs
+// Get statistics
+// Total assigned bugs
 $sql = "SELECT COUNT(*) as total FROM bugs WHERE assigned_to = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$total_assigned = $result->fetch_assoc()['total'];
+$total_assigned_bugs = $result->fetch_assoc()['total'];
 
-// Get open assigned bugs
+// Open assigned bugs
 $sql = "SELECT COUNT(*) as open FROM bugs WHERE assigned_to = ? AND status NOT IN (?, ?)";
 $stmt = $conn->prepare($sql);
+$closed = STATUS_CLOSED;
+$resolved = STATUS_RESOLVED;
 $stmt->bind_param("iss", $user_id, $closed, $resolved);
 $stmt->execute();
 $result = $stmt->get_result();
-$open_assigned = $result->fetch_assoc()['open'];
+$open_assigned_bugs = $result->fetch_assoc()['open'];
 
-// Get resolved bugs
+// Resolved bugs
 $sql = "SELECT COUNT(*) as resolved FROM bugs WHERE assigned_to = ? AND status = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("is", $user_id, $resolved);
@@ -59,18 +37,37 @@ $stmt->execute();
 $result = $stmt->get_result();
 $resolved_bugs = $result->fetch_assoc()['resolved'];
 
-// Get recent activity
-$sql = "SELECT h.*, b.title as bug_title, u.fullname 
-        FROM bug_history h 
-        JOIN bugs b ON h.bug_id = b.id 
-        JOIN users u ON h.user_id = u.id 
+// Closed bugs
+$sql = "SELECT COUNT(*) as closed FROM bugs WHERE assigned_to = ? AND status = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("is", $user_id, $closed);
+$stmt->execute();
+$result = $stmt->get_result();
+$closed_bugs = $result->fetch_assoc()['closed'];
+
+// Recent assigned bugs
+$sql = "SELECT b.*, p.name as project_name, u.fullname as reported_by_name 
+        FROM bugs b 
+        JOIN projects p ON b.project_id = p.id 
+        JOIN users u ON b.reported_by = u.id 
         WHERE b.assigned_to = ? 
-        ORDER BY h.created_at DESC 
-        LIMIT 10";
+        ORDER BY b.created_at DESC LIMIT 5";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$recent_activity = $stmt->get_result();
+$recent_assigned_bugs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Get all projects the staff is working on (projects with assigned bugs)
+$sql = "SELECT DISTINCT p.id, p.name, p.description, p.status, 
+        (SELECT COUNT(*) FROM bugs WHERE project_id = p.id AND assigned_to = ?) as bug_count 
+        FROM projects p 
+        JOIN bugs b ON p.id = b.project_id 
+        WHERE b.assigned_to = ? 
+        ORDER BY bug_count DESC LIMIT 5";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $user_id, $user_id);
+$stmt->execute();
+$staff_projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -96,27 +93,39 @@ $recent_activity = $stmt->get_result();
         </div>
 
         <div class="row">
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card dashboard-card">
                     <div class="card-body">
-                        <h5 class="card-title">Total Assigned</h5>
-                        <p class="card-text display-4"><?php echo $total_assigned; ?></p>
+                        <h5 class="card-title">Assigned Bugs</h5>
+                        <p class="card-text display-4"><?php echo $total_assigned_bugs; ?></p>
+                        <a href="assigned_bugs.php" class="btn btn-sm btn-primary">View All</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card dashboard-card">
                     <div class="card-body">
-                        <h5 class="card-title">Open Assigned</h5>
-                        <p class="card-text display-4"><?php echo $open_assigned; ?></p>
+                        <h5 class="card-title">Open Bugs</h5>
+                        <p class="card-text display-4"><?php echo $open_assigned_bugs; ?></p>
+                        <a href="assigned_bugs.php?status=open" class="btn btn-sm btn-primary">View All</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-3 mb-4">
                 <div class="card dashboard-card">
                     <div class="card-body">
                         <h5 class="card-title">Resolved Bugs</h5>
                         <p class="card-text display-4"><?php echo $resolved_bugs; ?></p>
+                        <a href="assigned_bugs.php?status=resolved" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Closed Bugs</h5>
+                        <p class="card-text display-4"><?php echo $closed_bugs; ?></p>
+                        <a href="assigned_bugs.php?status=closed" class="btn btn-sm btn-primary">View All</a>
                     </div>
                 </div>
             </div>
@@ -126,10 +135,10 @@ $recent_activity = $stmt->get_result();
             <div class="col-md-8 mb-4">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Assigned Bugs</h5>
+                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Recently Assigned Bugs</h5>
                     </div>
                     <div class="card-body">
-                        <?php if ($assigned_bugs->num_rows > 0): ?>
+                        <?php if (count($recent_assigned_bugs) > 0): ?>
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -144,13 +153,61 @@ $recent_activity = $stmt->get_result();
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php while ($bug = $assigned_bugs->fetch_assoc()): ?>
-                                        <tr class="bug-priority-<?php echo $bug['priority']; ?>">
+                                        <?php foreach ($recent_assigned_bugs as $bug): ?>
+                                        <tr>
                                             <td>#<?php echo $bug['id']; ?></td>
                                             <td><?php echo htmlspecialchars($bug['title']); ?></td>
                                             <td><?php echo htmlspecialchars($bug['project_name']); ?></td>
-                                            <td><?php echo get_status_badge($bug['status']); ?></td>
-                                            <td><?php echo get_priority_badge($bug['priority']); ?></td>
+                                            <td>
+                                                <?php
+                                                $status_class = '';
+                                                switch ($bug['status']) {
+                                                    case 'new':
+                                                        $status_class = 'bg-info';
+                                                        break;
+                                                    case 'assigned':
+                                                        $status_class = 'bg-primary';
+                                                        break;
+                                                    case 'in_progress':
+                                                        $status_class = 'bg-warning';
+                                                        break;
+                                                    case 'resolved':
+                                                        $status_class = 'bg-success';
+                                                        break;
+                                                    case 'closed':
+                                                        $status_class = 'bg-secondary';
+                                                        break;
+                                                    case 'reopened':
+                                                        $status_class = 'bg-danger';
+                                                        break;
+                                                }
+                                                ?>
+                                                <span class="badge <?php echo $status_class; ?>">
+                                                    <?php echo ucfirst(str_replace('_', ' ', $bug['status'])); ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $priority_class = '';
+                                                switch ($bug['priority']) {
+                                                    case 'low':
+                                                        $priority_class = 'bg-success';
+                                                        break;
+                                                    case 'medium':
+                                                        $priority_class = 'bg-info';
+                                                        break;
+                                                    case 'high':
+                                                        $priority_class = 'bg-warning';
+                                                        break;
+                                                    case 'critical':
+                                                        $priority_class = 'bg-danger';
+                                                        break;
+                                                }
+                                                ?>
+                                                <span class="badge <?php echo $priority_class; ?>">
+                                                    <?php echo ucfirst($bug['priority']); ?>
+                                                </span>
+                                            </td>
                                             <td><?php echo htmlspecialchars($bug['reported_by_name']); ?></td>
                                             <td>
                                                 <a href="view_bug.php?id=<?php echo $bug['id']; ?>" class="btn btn-sm btn-info">
@@ -158,13 +215,16 @@ $recent_activity = $stmt->get_result();
                                                 </a>
                                             </td>
                                         </tr>
-                                        <?php endwhile; ?>
+                                        <?php endforeach; ?>
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="text-end">
+                                <a href="assigned_bugs.php" class="btn btn-primary">View All Assigned Bugs</a>
+                            </div>
                         <?php else: ?>
                             <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>No bugs assigned to you yet.
+                                <i class="fas fa-info-circle me-2"></i>You don't have any assigned bugs yet.
                             </div>
                         <?php endif; ?>
                     </div>
@@ -173,32 +233,74 @@ $recent_activity = $stmt->get_result();
             
             <div class="col-md-4 mb-4">
                 <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>My Projects</h5>
                     </div>
                     <div class="card-body">
-                        <?php if ($recent_activity->num_rows > 0): ?>
-                            <div class="timeline">
-                                <?php while ($activity = $recent_activity->fetch_assoc()): ?>
-                                    <div class="timeline-item">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <strong><?php echo htmlspecialchars($activity['fullname']); ?></strong>
-                                                <span><?php echo htmlspecialchars($activity['action']); ?></span>
-                                                <a href="view_bug.php?id=<?php echo $activity['bug_id']; ?>" class="text-decoration-none">
-                                                    <?php echo htmlspecialchars($activity['bug_title']); ?>
-                                                </a>
-                                            </div>
-                                            <small class="text-muted"><?php echo format_datetime($activity['created_at']); ?></small>
-                                        </div>
+                        <?php if (count($staff_projects) > 0): ?>
+                            <div class="list-group">
+                                <?php foreach ($staff_projects as $project): ?>
+                                <a href="projects.php?id=<?php echo $project['id']; ?>" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1"><?php echo htmlspecialchars($project['name']); ?></h6>
+                                        <span class="badge bg-primary rounded-pill"><?php echo $project['bug_count']; ?> bugs</span>
                                     </div>
-                                <?php endwhile; ?>
+                                    <p class="mb-1 text-truncate"><?php echo htmlspecialchars($project['description']); ?></p>
+                                    <small class="text-muted">
+                                        Status: 
+                                        <span class="badge bg-<?php echo $project['status'] === 'active' ? 'success' : ($project['status'] === 'inactive' ? 'warning' : 'secondary'); ?>">
+                                            <?php echo ucfirst($project['status']); ?>
+                                        </span>
+                                    </small>
+                                </a>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="text-end mt-3">
+                                <a href="projects.php" class="btn btn-success">View All Projects</a>
                             </div>
                         <?php else: ?>
                             <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>No recent activity.
+                                <i class="fas fa-info-circle me-2"></i>You are not assigned to any projects yet.
                             </div>
                         <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Bug Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h5>Total Assigned</h5>
+                                    <h2 class="text-primary"><?php echo $total_assigned_bugs; ?></h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h5>Open Bugs</h5>
+                                    <h2 class="text-warning"><?php echo $open_assigned_bugs; ?></h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h5>Resolved Bugs</h5>
+                                    <h2 class="text-success"><?php echo $resolved_bugs; ?></h2>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h5>Closed Bugs</h5>
+                                    <h2 class="text-secondary"><?php echo $closed_bugs; ?></h2>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

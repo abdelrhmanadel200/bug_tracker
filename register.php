@@ -1,3 +1,21 @@
+<?php
+// Include configuration
+require_once 'config/config.php';
+
+// Check if user is already logged in
+if (isset($_SESSION['user_id'])) {
+    // Redirect to appropriate dashboard based on role
+    if ($_SESSION['role'] === 'admin') {
+        header('Location: admin/dashboard.php');
+    } elseif ($_SESSION['role'] === 'staff') {
+        header('Location: staff/dashboard.php');
+    } else {
+        header('Location: customer/dashboard.php');
+    }
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +32,7 @@
     <main class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="auth-form bg-white">
+                <div class="auth-form bg-white shadow-sm rounded p-4 p-md-5">
                     <h2 class="text-center mb-4">Create an Account</h2>
                     
                     <?php
@@ -45,6 +63,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                 <input type="password" class="form-control" id="password" name="password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                             <div class="form-text">Password must be at least 8 characters long.</div>
                         </div>
@@ -68,7 +89,7 @@
                             <label class="form-check-label" for="terms">I agree to the <a href="terms.php" class="text-decoration-none">Terms and Conditions</a></label>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Register</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Register</button>
                         </div>
                     </form>
                     
@@ -87,6 +108,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
         // Client-side validation
         document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
