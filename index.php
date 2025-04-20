@@ -48,7 +48,6 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                 </div>
                 <div class="col-lg-6 mt-5 mt-lg-0">
                     <div class="hero-image text-center">
-                        <img src="assets/images/bug-tracking-illustration.svg" alt="Bug Tracking Illustration" class="img-fluid rounded shadow-lg" style="max-height: 400px;">
                     </div>
                 </div>
             </div>

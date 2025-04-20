@@ -32,22 +32,21 @@ $is_logged_in = isset($_SESSION['user_id']);
     </section>
 
     <!-- Our Story Section -->
+
     <section class="our-story py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="assets/images/team-collaboration.jpg" alt="Team Collaboration" class="img-fluid rounded shadow">
-                </div>
-                <div class="col-lg-6">
-                    <h2 class="fw-bold mb-4">Our Story</h2>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 mx-auto text-center">
+      <h2 class="fw-bold mb-4">Our Story</h2>
                     <p class="lead">BugTracker was born out of necessity and a passion for improving software development processes.</p>
                     <p>In 2018, a team of developers faced the challenge of managing bugs across multiple projects. Frustrated with existing solutions that were either too complex or too simple, they decided to build their own bug tracking system that would strike the perfect balance between functionality and usability.</p>
                     <p>What started as an internal tool quickly gained attention from other development teams who saw its potential. After refining the system based on feedback from early adopters, BugTracker was officially launched to the public in 2020.</p>
                     <p>Today, BugTracker is used by thousands of development teams worldwide, from small startups to large enterprises, all benefiting from our streamlined approach to bug tracking and issue management.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
+
 
     <!-- Our Mission Section -->
     <section class="our-mission py-5 bg-light">
