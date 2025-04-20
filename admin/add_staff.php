@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Log the activity
                 $admin_id = $_SESSION['user_id'];
                 $action = "Created new staff member: $fullname (ID: $new_user_id)";
-                log_activity($conn, $admin_id, null, $action);
+                // log_activity($conn, $admin_id, null, $action);
                 
                 header('Location: users.php?success=created');
                 exit();
