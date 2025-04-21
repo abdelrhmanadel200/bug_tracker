@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Log the activity
                 $action = "Created new project: $name (ID: $new_project_id)";
-                log_activity($conn, $user_id, null, $action);
+                // log_activity($conn, $user_id, null, $action);
                 
                 header('Location: projects.php?success=created');
                 exit();

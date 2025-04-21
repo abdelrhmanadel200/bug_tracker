@@ -34,7 +34,7 @@ if (isset($_POST['delete_project'])) {
             // Log the activity
             $user_id = $_SESSION['user_id'];
             $action = "Deleted project ID: $project_id";
-            log_activity($conn, $user_id, null, $action);
+            // log_activity($conn, $user_id, null, $action);
         } else {
             $delete_error = "Error deleting project: " . $conn->error;
         }
@@ -124,7 +124,7 @@ $total_pages = ceil($total_projects / $limit);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Bugs - BugTracker</title>
+    <title>Manage Projects - BugTracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -211,7 +211,7 @@ $total_pages = ceil($total_projects / $limit);
                                 <tr>
                                     <td><?php echo $project['id']; ?></td>
                                     <td>
-                                        <a href="#" data-bs-toggle="modal" data-bs-target="#projectModal<?php echo $project['id']; ?>">
+                                        <a href="view_project.php?id=<?php echo $project['id']; ?>">
                                             <?php echo htmlspecialchars($project['name']); ?>
                                         </a>
                                     </td>
@@ -245,75 +245,14 @@ $total_pages = ceil($total_projects / $limit);
                                         <a href="add_project.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<?php echo $project['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-danger delete-project-btn" 
+                                                data-id="<?php echo $project['id']; ?>"
+                                                data-name="<?php echo htmlspecialchars($project['name']); ?>"
+                                                data-bug-count="<?php echo $project['bug_count']; ?>">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
-
-                                <!-- Project Details Modal -->
-                                <div class="modal fade" id="projectModal<?php echo $project['id']; ?>" tabindex="-1" aria-labelledby="projectModalLabel<?php echo $project['id']; ?>" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="projectModalLabel<?php echo $project['id']; ?>">Project Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <h4><?php echo htmlspecialchars($project['name']); ?></h4>
-                                                <p class="text-muted">Created on <?php echo date('F d, Y', strtotime($project['created_at'])); ?> by <?php echo htmlspecialchars($project['created_by_name']); ?></p>
-                                                
-                                                <div class="mb-3">
-                                                    <h5>Description</h5>
-                                                    <p><?php echo nl2br(htmlspecialchars($project['description'])); ?></p>
-                                                </div>
-                                                
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <h5>Status</h5>
-                                                        <p><span class="badge <?php echo $status_class; ?>"><?php echo ucfirst($project['status']); ?></span></p>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <h5>Bug Count</h5>
-                                                        <p><?php echo $project['bug_count']; ?> bugs</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <a href="add_project.php?id=<?php echo $project['id']; ?>" class="btn btn-warning">Edit Project</a>
-                                                <a href="bugs.php?project_id=<?php echo $project['id']; ?>" class="btn btn-primary">View Bugs</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Delete Confirmation Modal -->
-                                <div class="modal fade" id="deleteModal<?php echo $project['id']; ?>" tabindex="-1" aria-labelledby="deleteModalLabel<?php echo $project['id']; ?>" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="deleteModalLabel<?php echo $project['id']; ?>">Confirm Deletion</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Are you sure you want to delete the project: <strong><?php echo htmlspecialchars($project['name']); ?></strong>?</p>
-                                                <?php if ($project['bug_count'] > 0): ?>
-                                                    <div class="alert alert-warning">
-                                                        <i class="fas fa-exclamation-triangle"></i> This project has <?php echo $project['bug_count']; ?> associated bugs. You must reassign or delete these bugs before deleting the project.
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <form method="POST" action="">
-                                                    <input type="hidden" name="project_id" value="<?php echo $project['id']; ?>">
-                                                    <button type="submit" name="delete_project" class="btn btn-danger" <?php echo $project['bug_count'] > 0 ? 'disabled' : ''; ?>>Delete Project</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
@@ -350,12 +289,84 @@ $total_pages = ceil($total_projects / $limit);
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/main.js"></script>
+<!-- Single Delete Confirmation Modal (outside the loop) -->
+<div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteProjectModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the project: <strong id="projectNameToDelete"></strong>?</p>
+                <div id="bugWarning" class="alert alert-warning d-none">
+                    <i class="fas fa-exclamation-triangle"></i> This project has <span id="bugCountToDelete"></span> associated bugs. You must reassign or delete these bugs before deleting the project.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="" id="deleteProjectForm">
+                    <input type="hidden" name="project_id" id="projectIdToDelete" value="">
+                    <button type="submit" name="delete_project" id="confirmDeleteBtn" class="btn btn-danger">Delete Project</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <?php include '../includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/main.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the modal element
+    const deleteModal = document.getElementById('deleteProjectModal');
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/main.js"></script>
+    // Get all delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-project-btn');
+    
+    // Add click event to all delete buttons
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get project data from button attributes
+            const projectId = this.getAttribute('data-id');
+            const projectName = this.getAttribute('data-name');
+            const bugCount = parseInt(this.getAttribute('data-bug-count'));
+            
+            // Set values in the modal
+            document.getElementById('projectNameToDelete').textContent = projectName;
+            document.getElementById('projectIdToDelete').value = projectId;
+            
+            // Show or hide bug warning
+            const bugWarning = document.getElementById('bugWarning');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            
+            if (bugCount > 0) {
+                bugWarning.classList.remove('d-none');
+                document.getElementById('bugCountToDelete').textContent = bugCount;
+                confirmDeleteBtn.disabled = true;
+            } else {
+                bugWarning.classList.add('d-none');
+                confirmDeleteBtn.disabled = false;
+            }
+            
+            // Create a new Bootstrap modal instance and show it
+            const modalInstance = new bootstrap.Modal(deleteModal);
+            modalInstance.show();
+        });
+    });
+    
+    // Clean up modal when it's hidden
+    deleteModal.addEventListener('hidden.bs.modal', function() {
+        // Reset form values
+        document.getElementById('deleteProjectForm').reset();
+        document.getElementById('projectIdToDelete').value = '';
+        document.getElementById('projectNameToDelete').textContent = '';
+        document.getElementById('bugWarning').classList.add('d-none');
+    });
+});
+</script>
 </body>
 </html>

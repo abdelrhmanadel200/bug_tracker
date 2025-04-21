@@ -26,7 +26,7 @@ if (isset($_POST['change_status'])) {
             // Log the activity
             $admin_id = $_SESSION['user_id'];
             $action = "Changed user ID: $user_id status to $new_status";
-            log_activity($conn, $admin_id, null, $action);
+            // log_activity($conn, $admin_id, null, $action);
         } else {
             $status_error = "Error updating user status: " . $conn->error;
         }

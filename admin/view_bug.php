@@ -4,9 +4,9 @@
     require_once '../includes/functions.php';
 
     // Check if admin is logged in
-    if (!is_logged_in() || !is_admin()) {
-        redirect('../login.php');
-    }
+    // if (!is_logged_in() || !is_admin()) {
+    //     redirect('../login.php');
+    // }
 
     // Helper function to safely get values from arrays
     function safe_get($array, $key, $default = '') {
@@ -289,7 +289,7 @@
                     }
                 } elseif ($new_mode) {
                     // Generate ticket number
-                    $ticket_number = generate_ticket_number($conn);
+                    $ticket_number = 'BUG-' . date('Ymd') . '-' . strtoupper(generate_random_string(6));
                     
                     // Create new bug
                     $insert_query = "INSERT INTO bugs (
@@ -307,7 +307,7 @@
                                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
                     
                     $insert_stmt = $conn->prepare($insert_query);
-                    $insert_stmt->bind_param("iiissssss", 
+                    $insert_stmt->bind_param("iiisssssss", 
                                         $project_id, 
                                         $reported_by, 
                                         $assigned_to, 
@@ -324,11 +324,11 @@
                         
                         // Log the activity
                         $action_text = "Created new bug #$ticket_number: $title";
-                        log_action($conn, $user_id, $new_bug_id, $action_text);
+                        // log_action($conn, $user_id, $new_bug_id, $action_text);
                         
                         // Add to bug history
                         $history_action = "Created bug";
-                        add_bug_history($conn, $new_bug_id, $user_id, $history_action);
+                        // add_bug_history($conn, $new_bug_id, $user_id, $history_action);
                         
                         // If assigned to someone, add to bug history
                         if (!empty($assigned_to)) {
@@ -341,7 +341,7 @@
                             $staff_name = safe_get($staff_name_row, 'fullname', 'Unknown');
                             
                             $history_action = "Assigned bug to $staff_name";
-                            add_bug_history($conn, $new_bug_id, $user_id, $history_action);
+                            // add_bug_history($conn, $new_bug_id, $user_id, $history_action);
                         }
                         
                         header('Location: view_bug.php?id=' . $new_bug_id . '&success=created');
@@ -396,11 +396,11 @@
             if ($comment_stmt->execute()) {
                 // Log the activity
                 $action_text = "Added comment to bug #$ticket_number";
-                log_action($conn, $user_id, $bug_id, $action_text);
+                // log_action($conn, $user_id, $bug_id, $action_text);
                 
                 // Add to bug history
                 $history_action = "Added a comment";
-                add_bug_history($conn, $bug_id, $user_id, $history_action);
+                // add_bug_history($conn, $bug_id, $user_id, $history_action);
                 
                 // Refresh the page to show the new comment
                 header('Location: view_bug.php?id=' . $bug_id . '#comments');

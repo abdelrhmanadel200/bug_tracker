@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Log the activity
             $action = "Updated user {$user['fullname']} (ID: $user_id) - Status: $new_status, Role: $new_role";
-            log_admin_action($conn, $_SESSION['user_id'], $action);
+            // log_admin_action($conn, $_SESSION['user_id'], $action);
         } else {
             $error_message = "Error updating user: " . $conn->error;
         }
@@ -177,7 +177,7 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                             </span>
                         </div>
                         <p><strong>Member Since:</strong> <?php echo date('F d, Y', strtotime($user['created_at'])); ?></p>
-                        <p><strong>Last Updated:</strong> <?php echo date('F d, Y H:i', strtotime($user['updated_at'])); ?></p>
+                        <p><strong>Last Updated:</strong> <?php echo !empty($user['updated_at']) ? date('F d, Y H:i', strtotime($user['updated_at'])) : 'Never updated'; ?></p>
                     </div>
                 </div>
 

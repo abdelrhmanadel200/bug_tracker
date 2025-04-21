@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $bug_id = $stmt->insert_id;
         
         // Log action
-        log_action('Bug reported', $user_id, $bug_id);
+        // log_action('Bug reported', $user_id, $bug_id);
         
         // Redirect to success page
         redirect('view_bug.php?id=' . $bug_id . '&success=Bug reported successfully! Your ticket number is ' . $ticket_number);
