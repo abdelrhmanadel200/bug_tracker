@@ -26,11 +26,15 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-1"></i><?php echo $_SESSION['user_name']; ?>
+                            <?php if (!empty($user['profile_image']) && file_exists('../../uploads/profile/' . $user['profile_image'])): ?>
+                                <img src="../../uploads/profile/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="rounded-circle me-1" style="width:30px; height:30px; object-fit:cover;">
+                            <?php else: ?>
+                                <i class="fas fa-user-circle me-1"></i>
+                            <?php endif; ?>
+                            <?php echo htmlspecialchars($_SESSION['user_name']); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="settings.php"><i class="fas fa-cog me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
