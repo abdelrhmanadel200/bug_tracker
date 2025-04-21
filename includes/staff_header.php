@@ -26,8 +26,8 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <?php if (!empty($user['profile_image']) && file_exists('../../uploads/profile/' . $user['profile_image'])): ?>
-                                <img src="../../uploads/profile/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="rounded-circle me-1" style="width:30px; height:30px; object-fit:cover;">
+                            <?php if (!empty($user['profile_image']) && file_exists('../uploads/profile/' . $user['profile_image'])): ?>
+                                <img src="../uploads/profile/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="rounded-circle me-1" style="width:30px; height:30px; object-fit:cover;">
                             <?php else: ?>
                                 <i class="fas fa-user-circle me-1"></i>
                             <?php endif; ?>

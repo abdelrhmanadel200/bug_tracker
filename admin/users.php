@@ -124,7 +124,7 @@ $total_pages = ceil($total_users / $limit);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Bugs - BugTracker</title>
+    <title>Manage Users - BugTracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -197,7 +197,7 @@ $total_pages = ceil($total_users / $limit);
             <h5 class="mb-0">All Users (<?php echo $total_users; ?>)</h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive"  >
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
@@ -278,7 +278,7 @@ $total_pages = ceil($total_users / $limit);
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
                                                 <li>
-                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewModal<?php echo $user['id']; ?>">
+                                                    <a class="dropdown-item view-user" href="#" data-user-id="<?php echo $user['id']; ?>">
                                                         <i class="fas fa-eye me-2"></i> View Details
                                                     </a>
                                                 </li>
@@ -291,17 +291,26 @@ $total_pages = ceil($total_users / $limit);
                                                 <?php endif; ?>
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <a class="dropdown-item text-success" href="#" data-bs-toggle="modal" data-bs-target="#statusModal<?php echo $user['id']; ?>" data-status="active">
+                                                    <a class="dropdown-item text-success change-status" href="#" 
+                                                       data-user-id="<?php echo $user['id']; ?>" 
+                                                       data-status="active"
+                                                       data-user-name="<?php echo htmlspecialchars($user['fullname']); ?>">
                                                         <i class="fas fa-check-circle me-2"></i> Set Active
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item text-warning" href="#" data-bs-toggle="modal" data-bs-target="#statusModal<?php echo $user['id']; ?>" data-status="inactive">
+                                                    <a class="dropdown-item text-warning change-status" href="#" 
+                                                       data-user-id="<?php echo $user['id']; ?>" 
+                                                       data-status="inactive"
+                                                       data-user-name="<?php echo htmlspecialchars($user['fullname']); ?>">
                                                         <i class="fas fa-pause-circle me-2"></i> Set Inactive
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#statusModal<?php echo $user['id']; ?>" data-status="banned">
+                                                    <a class="dropdown-item text-danger change-status" href="#" 
+                                                       data-user-id="<?php echo $user['id']; ?>" 
+                                                       data-status="banned"
+                                                       data-user-name="<?php echo htmlspecialchars($user['fullname']); ?>">
                                                         <i class="fas fa-ban me-2"></i> Ban User
                                                     </a>
                                                 </li>
@@ -309,126 +318,6 @@ $total_pages = ceil($total_users / $limit);
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- View User Modal -->
-                                <div class="modal fade" id="viewModal<?php echo $user['id']; ?>" tabindex="-1" aria-labelledby="viewModalLabel<?php echo $user['id']; ?>" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="viewModalLabel<?php echo $user['id']; ?>">User Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-md-4 text-center mb-3">
-                                                        <?php if (!empty($user['profile_image'])): ?>
-                                                            <img src="../uploads/profile/<?php echo $user['profile_image']; ?>" alt="Profile" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
-                                                        <?php else: ?>
-                                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px; font-size: 60px;">
-                                                                <?php echo strtoupper(substr($user['fullname'], 0, 1)); ?>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                        <h4><?php echo htmlspecialchars($user['fullname']); ?></h4>
-                                                        <span class="badge <?php echo $role_class; ?> mb-2">
-                                                            <?php echo ucfirst($user['role']); ?>
-                                                        </span>
-                                                        <span class="badge <?php echo $status_class; ?>">
-                                                            <?php echo ucfirst($user['status']); ?>
-                                                        </span>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <h5>Contact Information</h5>
-                                                        <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
-                                                        
-                                                        <h5 class="mt-4">Account Information</h5>
-                                                        <p><strong>User ID:</strong> <?php echo $user['id']; ?></p>
-                                                        <p><strong>Registered:</strong> <?php echo date('F d, Y H:i:s', strtotime($user['created_at'])); ?></p>
-                                                        <?php if ($user['updated_at']): ?>
-                                                            <p><strong>Last Updated:</strong> <?php echo date('F d, Y H:i:s', strtotime($user['updated_at'])); ?></p>
-                                                        <?php endif; ?>
-                                                        
-                                                        <?php
-                                                        // Get bug statistics
-                                                        $bug_stats_query = "SELECT 
-                                                            COUNT(*) as total_bugs,
-                                                            SUM(CASE WHEN status = 'resolved' OR status = 'closed' THEN 1 ELSE 0 END) as resolved_bugs
-                                                            FROM bugs WHERE ";
-                                                        
-                                                        if ($user['role'] === 'customer') {
-                                                            $bug_stats_query .= "reported_by = ?";
-                                                        } else {
-                                                            $bug_stats_query .= "assigned_to = ?";
-                                                        }
-                                                        
-                                                        $bug_stats_stmt = $conn->prepare($bug_stats_query);
-                                                        $bug_stats_stmt->bind_param("i", $user['id']);
-                                                        $bug_stats_stmt->execute();
-                                                        $bug_stats_result = $bug_stats_stmt->get_result();
-                                                        $bug_stats = $bug_stats_result->fetch_assoc();
-                                                        ?>
-                                                        
-                                                        <h5 class="mt-4">Bug Statistics</h5>
-                                                        <?php if ($user['role'] === 'customer'): ?>
-                                                            <p><strong>Total Reported Bugs:</strong> <?php echo $bug_stats['total_bugs']; ?></p>
-                                                            <p><strong>Resolved Bugs:</strong> <?php echo $bug_stats['resolved_bugs']; ?></p>
-                                                        <?php else: ?>
-                                                            <p><strong>Total Assigned Bugs:</strong> <?php echo $bug_stats['total_bugs']; ?></p>
-                                                            <p><strong>Resolved Bugs:</strong> <?php echo $bug_stats['resolved_bugs']; ?></p>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <?php if ($user['role'] === 'staff'): ?>
-                                                    <a href="add_staff.php?id=<?php echo $user['id']; ?>" class="btn btn-primary">Edit User</a>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Change Status Modal -->
-                                <div class="modal fade" id="statusModal<?php echo $user['id']; ?>" tabindex="-1" aria-labelledby="statusModalLabel<?php echo $user['id']; ?>" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="statusModalLabel<?php echo $user['id']; ?>">Change User Status</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form method="POST" action="">
-                                                <div class="modal-body">
-                                                    <p>Are you sure you want to change the status of <strong><?php echo htmlspecialchars($user['fullname']); ?></strong>?</p>
-                                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                    <input type="hidden" name="new_status" id="newStatus<?php echo $user['id']; ?>" value="">
-                                                    
-                                                    <div class="form-check mb-2">
-                                                        <input class="form-check-input status-radio" type="radio" name="status_option" id="statusActive<?php echo $user['id']; ?>" value="active" data-user-id="<?php echo $user['id']; ?>" <?php echo $user['status'] === 'active' ? 'checked' : ''; ?>>
-                                                        <label class="form-check-label" for="statusActive<?php echo $user['id']; ?>">
-                                                            <span class="badge bg-success">Active</span> - User can log in and use the system
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check mb-2">
-                                                        <input class="form-check-input status-radio" type="radio" name="status_option" id="statusInactive<?php echo $user['id']; ?>" value="inactive" data-user-id="<?php echo $user['id']; ?>" <?php echo $user['status'] === 'inactive' ? 'checked' : ''; ?>>
-                                                        <label class="form-check-label" for="statusInactive<?php echo $user['id']; ?>">
-                                                            <span class="badge bg-warning">Inactive</span> - User account is temporarily disabled
-                                                        </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input status-radio" type="radio" name="status_option" id="statusBanned<?php echo $user['id']; ?>" value="banned" data-user-id="<?php echo $user['id']; ?>" <?php echo $user['status'] === 'banned' ? 'checked' : ''; ?>>
-                                                        <label class="form-check-label" for="statusBanned<?php echo $user['id']; ?>">
-                                                            <span class="badge bg-danger">Banned</span> - User is permanently banned from the system
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <button type="submit" name="change_status" class="btn btn-primary">Save Changes</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
@@ -465,33 +354,182 @@ $total_pages = ceil($total_users / $limit);
     </div>
 </div>
 
-<script>
-    // Set the new status value when a status option is selected
-    document.querySelectorAll('.status-radio').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            const userId = this.getAttribute('data-user-id');
-            document.getElementById('newStatus' + userId).value = this.value;
-        });
-    });
+<!-- Single View User Modal -->
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewUserModalBody">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading user details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="#" id="editUserLink" class="btn btn-primary d-none">Edit User</a>
+            </div>
+        </div>
+    </div>
+</div>
 
-    // Set the new status value when clicking on dropdown items
-    document.querySelectorAll('.dropdown-item').forEach(function(item) {
-        item.addEventListener('click', function() {
-            const status = this.getAttribute('data-status');
-            if (status) {
-                const userId = this.closest('.dropdown-menu').getAttribute('aria-labelledby').replace('dropdownMenuButton', '');
-                document.getElementById('newStatus' + userId).value = status;
-                document.getElementById('status' + status.charAt(0).toUpperCase() + status.slice(1) + userId).checked = true;
-            }
-        });
-    });
-</script>
+<!-- Single Change Status Modal -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStatusModalLabel">Change User Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="" id="changeStatusForm">
+                <div class="modal-body">
+                    <p>Are you sure you want to change the status of <strong id="statusUserName"></strong>?</p>
+                    <input type="hidden" name="user_id" id="statusUserId" value="">
+                    <input type="hidden" name="new_status" id="newStatusValue" value="">
+                    
+                    <div class="form-check mb-2">
+                        <input class="form-check-input status-option" type="radio" name="status_option" id="statusActive" value="active">
+                        <label class="form-check-label" for="statusActive">
+                            <span class="badge bg-success">Active</span> - User can log in and use the system
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input status-option" type="radio" name="status_option" id="statusInactive" value="inactive">
+                        <label class="form-check-label" for="statusInactive">
+                            <span class="badge bg-warning">Inactive</span> - User account is temporarily disabled
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input status-option" type="radio" name="status_option" id="statusBanned" value="banned">
+                        <label class="form-check-label" for="statusBanned">
+                            <span class="badge bg-danger">Banned</span> - User is permanently banned from the system
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="change_status" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php include '../includes/footer.php'; ?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/main.js"></script>
+<script src="../assets/js/main.js"></script>
 
-    <?php include '../includes/footer.php'; ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View User Modal
+    const viewUserModal = document.getElementById('viewUserModal');
+    const viewUserModalInstance = new bootstrap.Modal(viewUserModal);
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/main.js"></script>
+    // Change Status Modal
+    const changeStatusModal = document.getElementById('changeStatusModal');
+    const changeStatusModalInstance = new bootstrap.Modal(changeStatusModal);
+    
+    // Handle View User clicks
+    document.querySelectorAll('.view-user').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            
+            // Show the modal with loading state
+            document.getElementById('viewUserModalBody').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading user details...</p>
+                </div>
+            `;
+            
+            viewUserModalInstance.show();
+            
+            // Fetch user details via AJAX
+            fetch(`get_user_details.php?id=${userId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('viewUserModalBody').innerHTML = html;
+                    
+                    // Show edit button if staff
+                    const isStaff = document.getElementById('viewUserModalBody').querySelector('[data-role="staff"]');
+                    const editLink = document.getElementById('editUserLink');
+                    
+                    if (isStaff) {
+                        editLink.href = `add_staff.php?id=${userId}`;
+                        editLink.classList.remove('d-none');
+                    } else {
+                        editLink.classList.add('d-none');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('viewUserModalBody').innerHTML = `
+                        <div class="alert alert-danger">
+                            Error loading user details. Please try again.
+                        </div>
+                    `;
+                    console.error('Error fetching user details:', error);
+                });
+        });
+    });
+    
+    // Handle Change Status clicks
+    document.querySelectorAll('.change-status').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            const status = this.getAttribute('data-status');
+            
+            // Set values in the modal
+            document.getElementById('statusUserId').value = userId;
+            document.getElementById('statusUserName').textContent = userName;
+            document.getElementById('newStatusValue').value = status;
+            
+            // Check the appropriate radio button
+            document.querySelectorAll('.status-option').forEach(function(radio) {
+                radio.checked = radio.value === status;
+            });
+            
+            // Show the modal
+            changeStatusModalInstance.show();
+        });
+    });
+    
+    // Update hidden status field when radio buttons change
+    document.querySelectorAll('.status-option').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('newStatusValue').value = this.value;
+        });
+    });
+    
+    // Clean up modals when hidden
+    viewUserModal.addEventListener('hidden.bs.modal', function() {
+        document.getElementById('viewUserModalBody').innerHTML = '';
+        document.getElementById('editUserLink').classList.add('d-none');
+    });
+    
+    changeStatusModal.addEventListener('hidden.bs.modal', function() {
+        document.getElementById('changeStatusForm').reset();
+        document.getElementById('statusUserId').value = '';
+        document.getElementById('statusUserName').textContent = '';
+        document.getElementById('newStatusValue').value = '';
+    });
+});
+</script>
+<style>
+    .table-responsive {
+        overflow: visible;
+    }
+    </style>
 </body>
 </html>

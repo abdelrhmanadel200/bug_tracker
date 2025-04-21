@@ -141,7 +141,9 @@ switch ($report_type) {
                           ORDER BY date";
         
         $user_reg_stmt = $conn->prepare($user_reg_query);
-        $user_reg_stmt->bind_param("ss", $start_date . ' 00:00:00', $end_date . ' 23:59:59');
+        $start_datetime = $start_date . ' 00:00:00';
+        $end_datetime = $end_date . ' 23:59:59';
+        $user_reg_stmt->bind_param("ss", $start_datetime, $end_datetime);
         $user_reg_stmt->execute();
         $user_reg_result = $user_reg_stmt->get_result();
         $user_reg_data = $user_reg_result->fetch_all(MYSQLI_ASSOC);
