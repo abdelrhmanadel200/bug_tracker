@@ -16,7 +16,7 @@
             </div>
             <div class="col-md-4">
                 <h5>Contact Us</h5>
-                <p class="small">Email: support@bugtracker.com<br>Phone: +1 (123) 456-7890</p>
+                <p class="small">Email: abdelrhmanadel2462005@gmail.com<br>Phone: +20 1147533210</p>
                 <div class="social-icons">
                     <a href="#" class="text-decoration-none me-2"><i class="fab fa-facebook"></i></a>
                     <a href="#" class="text-decoration-none me-2"><i class="fab fa-twitter"></i></a>

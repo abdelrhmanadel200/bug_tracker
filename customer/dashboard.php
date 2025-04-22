@@ -22,6 +22,13 @@ $bugs = $stmt->get_result();
 $sql = "SELECT id, name FROM projects WHERE status = 'active'";
 $result = $conn->query($sql);
 $projects = $result->fetch_all(MYSQLI_ASSOC);
+$user_id = $_SESSION['user_id'];
+$user_query = "SELECT * FROM users WHERE id = ?";
+$user_stmt = $conn->prepare($user_query);
+$user_stmt->bind_param("i", $user_id);
+$user_stmt->execute();
+$user_result = $user_stmt->get_result();
+$user = $user_result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>

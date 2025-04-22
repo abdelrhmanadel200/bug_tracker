@@ -1,3 +1,16 @@
+<?php
+// Make sure we have user data
+if (!isset($user) && isset($_SESSION['user_id'])) {
+    // Fetch user data if not already available
+    $user_id = $_SESSION['user_id'];
+    $user_query = "SELECT * FROM users WHERE id = ?";
+    $user_stmt = $conn->prepare($user_query);
+    $user_stmt->bind_param("i", $user_id);
+    $user_stmt->execute();
+    $user_result = $user_stmt->get_result();
+    $user = $user_result->fetch_assoc();
+}
+?>
 <header class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light container">
         <div class="container-fluid">
