@@ -330,7 +330,7 @@ $team_members = $team_result->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="add_bug.php?project_id=<?php echo $project_id; ?>" class="btn btn-primary">
+                            <a href="view_bug.php?action=new" class="btn btn-primary">
                                 <i class="fas fa-plus me-2"></i> Add New Bug
                             </a>
                             <a href="bugs.php?project_id=<?php echo $project_id; ?>" class="btn btn-info">
