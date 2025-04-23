@@ -263,6 +263,9 @@ $projects = $projects_result->fetch_all(MYSQLI_ASSOC);
                                             <a href="view_bug.php?id=<?php echo $bug['id']; ?>&action=edit" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <a href="view_bug.php?id=<?php echo $bug['id']; ?>&action=edit" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

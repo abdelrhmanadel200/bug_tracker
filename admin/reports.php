@@ -812,8 +812,8 @@ switch ($report_type) {
     document.addEventListener('DOMContentLoaded', function() {
         <?php if ($report_type === 'bugs'): ?>
             // Bug Status Chart
-            const statusCtx = document.getElementById('bugStatusChart').getContext('2d');
-            new Chart(statusCtx, {
+            const statussCtx = document.getElementById('bugStatusChart').getContext('2d');
+            new Chart(statussCtx, {
                 type: 'pie',
                 data: {
                     labels: [
@@ -995,8 +995,8 @@ switch ($report_type) {
             });
             
             // User Status Chart
-            const statusCtx = document.getElementById('userStatusChart').getContext('2d');
-            new Chart(statusCtx, {
+            const statulsCtx = document.getElementById('userStatusChart').getContext('2d');
+            new Chart(statulsCtx, {
                 type: 'doughnut',
                 data: {
                     labels: [

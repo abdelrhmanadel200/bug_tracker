@@ -4,9 +4,9 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // Check if admin is logged in
-// if (!is_logged_in() || $_SESSION['role'] !== 'admin') {
-//     redirect('../login.php');
-// }
+if (!is_logged_in() || !is_admin()) {
+    redirect('../login.php');
+}
 
 // Get user ID from URL
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -270,8 +270,8 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                 <button type="submit" name="update_status" class="btn btn-primary">
                                     <i class="fas fa-save me-1"></i> Update User
                                 </button>
-                                <a href="reset_password.php?id=<?php echo $user_id; ?>" class="btn btn-warning">
-                                    <i class="fas fa-key me-1"></i> Reset Password
+                                <a href="admin_reset_password.php?id=<?php echo $user_id; ?>" class="btn btn-warning">
+                                <i class="fas fa-key me-1"></i> Reset Password
                                 </a>
                                 <?php if ($user['status'] !== 'suspended'): ?>
                                     <a href="suspend_user.php?id=<?php echo $user_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to suspend this user?');">

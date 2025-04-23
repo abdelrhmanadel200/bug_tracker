@@ -74,7 +74,7 @@ else if (is_logged_in() && is_customer()) {
                     </form>
                     
                     <div class="text-center mt-3">
-                        <a href="forgot_password.php" class="text-decoration-none">Forgot password?</a>
+                        <a href="forgot_password.php" class="text-decoration-none text-primary">Forgot password?</a>
                     </div>
                     
                     <hr class="my-4">
