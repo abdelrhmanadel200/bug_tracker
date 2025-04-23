@@ -8,11 +8,11 @@
             <div class="col-md-4">
                 <h5>Quick Links</h5>
                 <ul class="list-unstyled">
-                <li><a href="../index.php" class="text-decoration-none">Home</a></li>
-                <li><a href="../features.php" class="text-decoration-none">Features</a></li>
-                <li><a href="../about.php" class="text-decoration-none">About</a></li>
-                <li><a href="../contact.php" class="text-decoration-none">Contact</a></li>
 
+                        <li><a href="index.php" class="text-decoration-none">Home</a></li>
+                        <li><a href="features.php" class="text-decoration-none">Features</a></li>
+                        <li><a href="about.php" class="text-decoration-none">About</a></li>
+                        <li><a href="contact.php" class="text-decoration-none">Contact</a></li>
 
                 </ul>
             </div>

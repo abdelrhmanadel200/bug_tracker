@@ -1,3 +1,12 @@
+<?php
+// Include configuration
+require_once 'config/config.php';
+
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['user_id']);
+$user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
+?>
+
 <header class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light container">
         <div class="container-fluid">
@@ -10,6 +19,15 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <?php if (is_admin()): ?>
+                            <a href="admin/dashboard.php" class="nav-link">Dashboard</a>
+                        <?php elseif (is_staff()): ?>
+                            <a href="staff/dashboard.php" class="nav-link">Dashboard</a>
+                        <?php elseif (is_customer()): ?>
+                            <a href="customer/dashboard.php" class="nav-link">Dashboard</a>
+                        <?php endif; ?>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php">Home</a>
                     </li>
