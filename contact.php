@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div>
                                     <h5>Phone</h5>
-                                    <p class="mb-0"><a href="tel:+14155552671" class="text-decoration-none">(415) 555-2671</a></p>
+                                    <p class="mb-0"><a href="tel:+201147533210" class="text-decoration-none">+20 1147533210</a></p>
                                 </div>
                             </div>
                             <div class="d-flex mb-3">
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div>
                                     <h5>Email</h5>
-                                    <p class="mb-0"><a href="mailto:support@bugtracker.com" class="text-decoration-none">support@bugtracker.com</a></p>
+                                    <p class="mb-0"><a href="mailto:abdelrhmanadel2462005@gmail.com" class="text-decoration-none">abdelrhmanadel2462005@gmail.com</a></p>
                                 </div>
                             </div>
                             <div class="d-flex">
@@ -258,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </h2>
                             <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    We offer support through multiple channels. You can email us at support@bugtracker.com, use the contact form on this page, or access our knowledge base and community forums from your dashboard. Enterprise customers also receive priority support with dedicated account managers.
+                                    We offer support through multiple channels. You can email us at abdelrhmanadel2462005@gmail.com, use the contact form on this page, or access our knowledge base and community forums from your dashboard. Enterprise customers also receive priority support with dedicated account managers.
                                 </div>
                             </div>
                         </div>

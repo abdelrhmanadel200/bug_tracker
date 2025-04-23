@@ -334,7 +334,7 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                                 </td>
                                                 <td><?php echo date('M d, Y', strtotime($bug['created_at'])); ?></td>
                                                 <td>
-                                                    <a href="../staff/view_bug.php?id=<?php echo $bug['id']; ?>" class="btn btn-sm btn-info">
+                                                    <a href="../admin/view_bug.php?id=<?php echo $bug['id']; ?>" class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </td>

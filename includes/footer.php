@@ -9,9 +9,25 @@
                 <h5>Quick Links</h5>
                 <ul class="list-unstyled">
                     <li><a href="index.php" class="text-decoration-none">Home</a></li>
-                    <li><a href="features.php" class="text-decoration-none">Features</a></li>
-                    <li><a href="about.php" class="text-decoration-none">About</a></li>
-                    <li><a href="contact.php" class="text-decoration-none">Contact</a></li>
+
+
+                    <?php if (empty($_SESSION['user_id'])): ?>
+                        <li><a href="features.php" class="text-decoration-none">Features</a></li>
+                    <?php else: ?>
+                        <li><a href="../features.php" class="text-decoration-none">Features</a></li>
+                    <?php endif; ?>
+
+                    <?php if (empty($_SESSION['user_id'])): ?>
+                        <li><a href="about.php" class="text-decoration-none">About</a></li>
+                    <?php else: ?>
+                        <li><a href="../about.php" class="text-decoration-none">About</a></li>
+                    <?php endif; ?>
+
+                    <?php if (empty($_SESSION['user_id'])): ?>
+                        <li><a href="contact.php" class="text-decoration-none">Contact</a></li>
+                    <?php else: ?>
+                        <li><a href="../contact.php" class="text-decoration-none">Contact</a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
             <div class="col-md-4">
