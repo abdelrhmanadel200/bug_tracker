@@ -278,7 +278,7 @@ $total_pages = ceil($total_users / $limit);
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $user['id']; ?>">
                                                 <li>
-                                                    <a class="dropdown-item view-user" href="#" data-user-id="<?php echo $user['id']; ?>">
+                                                    <a class="dropdown-item " href="view_user.php?id=<?php echo $user['id']; ?>">
                                                         <i class="fas fa-eye me-2"></i> View Details
                                                     </a>
                                                 </li>
