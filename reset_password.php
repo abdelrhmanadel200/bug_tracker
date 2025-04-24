@@ -79,8 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valid) {
             $mark_used_stmt = $conn->prepare("UPDATE password_resets SET used = 1 WHERE token = ?");
             $mark_used_stmt->bind_param("s", $token);
             $mark_used_stmt->execute();
-            
-            // Log the password reset in activity_logs
+// After successful password reset
+            $user_id = $user['id'];
+            $user_name = $user['fullname'];
+            log_password_reset_complete($user_id, $user_name);            // Log the password reset in activity_logs
             if ($user_id) {
                 $action = "Reset password via email link";
                 $log_stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");

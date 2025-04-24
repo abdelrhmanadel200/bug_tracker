@@ -5,8 +5,10 @@ require_once 'config/config.php';
 // Check if user is logged in
 if (is_logged_in()) {
     // Log action
-    log_action('User logged out', $_SESSION['user_id']);
-    
+// Before logging out
+    $user_id = $_SESSION['user_id'];
+    $user_name = $_SESSION['user_name']; // Assuming you store the user's name in the session
+    log_logout($user_id, $user_name);    
     // Clear session variables
     $_SESSION = array();
     

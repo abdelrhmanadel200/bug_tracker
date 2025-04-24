@@ -116,8 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->AltBody = "Hello $user_name,\n\nWe received a request to reset your password for your BugTracker account. Click the link below to reset your password:\n\n$reset_link\n\nIf you didn't request a password reset, you can safely ignore this email.\n\nThis link will expire in 1 hour for security reasons.\n\nBugTracker - Manage your bugs efficiently";
                     
                     $mail->send();
-                    
-                    // Log the activity
+// After sending reset email
+                    $user_id = $user['id'];
+                    $user_name = $user['fullname'];
+                    log_password_reset_request($user_id, $user_name);                    // Log the activity
                     $action = "Requested password reset";
                     $log_stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
                     $log_stmt->bind_param("is", $user_id, $action);

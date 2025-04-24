@@ -78,12 +78,11 @@ try {
     // Commit transaction
     $conn->commit();
     
-    // Log the activity
     $admin_id = $_SESSION['user_id'];
-    $action = "Deleted user: {$user['fullname']} (ID: $user_id)";
-    // log_admin_action($conn, $admin_id, $action);
+    $admin_name = $_SESSION['user_name'];
+    $user_info = "{$user['fullname']} (ID: $user_id)";
+    log_user_deletion($admin_id, $user_info, $admin_name);
     
-    // Redirect with success message
     redirect('users.php?success=User deleted successfully');
     
 } catch (Exception $e) {

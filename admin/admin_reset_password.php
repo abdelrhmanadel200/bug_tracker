@@ -54,8 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($update_stmt->execute()) {
             // Log the password reset in activity_logs
+
+
             $admin_id = $_SESSION['user_id'];
-            $action = "Reset password for user {$user['fullname']} (ID: $user_id)";
+            $admin_name = $_SESSION['user_name'];
+            $user_info = "{$user['fullname']}";
+            log_user_deletion($admin_id, $user_info, $admin_name);
+
+            
+            
+            $admin_id = $_SESSION['user_id'];
+            $action = "admin {$admin_name} Reset password for user {$user_info} ";
             $log_stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
             $log_stmt->bind_param("is", $admin_id, $action);
             $log_stmt->execute();
