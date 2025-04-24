@@ -276,7 +276,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                         <?php elseif ($user_role === 'staff'): ?>
                             <a href="staff/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">Staff Dashboard</a>
                         <?php else: ?>
-                            <a href="customer/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">My Dashboard</a>
+                            <a href="customer/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2" style="background-color:aliceblue; color:black;">My Dashboard</a>
                         <?php endif; ?>
                         <a href="features.php" class="btn btn-secondary btn-lg px-4">Explore Features</a>
                         <?php endif; ?>
