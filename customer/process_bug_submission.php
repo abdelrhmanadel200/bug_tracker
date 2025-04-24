@@ -1,6 +1,9 @@
 <?php
 // Include configuration
 require_once '../config/config.php';
+require_once '../config/database.php';
+require_once '../includes/functions.php';
+require_once '../includes/email_functions.php';
 
 // Check if user is logged in and is a customer
 if (!is_logged_in() || !is_customer()) {
@@ -52,7 +55,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $bug_id = $stmt->insert_id;
         
         // Log action
-        // log_action('Bug reported', $user_id, $bug_id);
+        log_action('Bug reported', $user_id, $bug_id);
+        
+        // Get project information
+        $project_query = "SELECT name FROM projects WHERE id = ?";
+        $project_stmt = $conn->prepare($project_query);
+        $project_stmt->bind_param("i", $project_id);
+        $project_stmt->execute();
+        $project_result = $project_stmt->get_result();
+        $project_info = $project_result->fetch_assoc();
+        
+        // Get reporter information
+        $reporter_query = "SELECT fullname, email FROM users WHERE id = ?";
+        $reporter_stmt = $conn->prepare($reporter_query);
+        $reporter_stmt->bind_param("i", $user_id);
+        $reporter_stmt->execute();
+        $reporter_result = $reporter_stmt->get_result();
+        $reporter_info = $reporter_result->fetch_assoc();
+        
+        // Get all admin emails
+        $admin_query = "SELECT id, fullname, email FROM users WHERE role = ? AND status = 'active'";
+        $admin_stmt = $conn->prepare($admin_query);
+        $admin_role = ROLE_ADMIN;
+        $admin_stmt->bind_param("s", $admin_role);
+        $admin_stmt->execute();
+        $admin_result = $admin_stmt->get_result();
+        
+        // Get the bug information
+        $bug_query = "SELECT * FROM bugs WHERE id = ?";
+        $bug_stmt = $conn->prepare($bug_query);
+        $bug_stmt->bind_param("i", $bug_id);
+        $bug_stmt->execute();
+        $bug_result = $bug_stmt->get_result();
+        $bug_info = $bug_result->fetch_assoc();
+        
+        // Send email notification to all admins
+        while ($admin = $admin_result->fetch_assoc()) {
+            $admin_info = [
+                'id' => $admin['id'],
+                'name' => $admin['fullname'],
+                'email' => $admin['email']
+            ];
+            
+            // Send notification email
+            send_bug_notification_email($admin_info, $bug_info, $reporter_info, $project_info);
+        }
         
         // Redirect to success page
         redirect('view_bug.php?id=' . $bug_id . '&success=Bug reported successfully! Your ticket number is ' . $ticket_number);
