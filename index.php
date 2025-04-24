@@ -268,11 +268,18 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                     <p class="lead mb-0">Join thousands of teams who trust our platform for their issue management needs.</p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
-                    <?php if (!$is_logged_in): ?>
-                        <a href="register.php" class="btn btn-light btn-lg px-4">Get Started Today</a>
+                <?php if (!$is_logged_in): ?>
+                    <a href="register.php" class="btn btn-light btn-lg px-4 me-md-2">Get Started</a>
                     <?php else: ?>
-                        <a href="<?php echo $user_role; ?>/dashboard.php" class="btn btn-light btn-lg px-4">Go to Dashboard</a>
-                    <?php endif; ?>
+                        <?php if ($user_role === 'admin'): ?>
+                            <a href="admin/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">Admin Dashboard</a>
+                        <?php elseif ($user_role === 'staff'): ?>
+                            <a href="staff/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">Staff Dashboard</a>
+                        <?php else: ?>
+                            <a href="customer/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">My Dashboard</a>
+                        <?php endif; ?>
+                        <a href="features.php" class="btn btn-secondary btn-lg px-4">Explore Features</a>
+                        <?php endif; ?>
                 </div>
             </div>
         </div>

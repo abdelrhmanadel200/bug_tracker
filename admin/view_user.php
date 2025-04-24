@@ -316,7 +316,6 @@ if (!$user) {
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Recent Bugs</h5>
-                        <a href="user_bugs.php?id=<?php echo $user_id; ?>" class="btn btn-sm btn-light">View All</a>
                     </div>
                     <div class="card-body">
                         <?php if (empty($bugs)): ?>
@@ -391,7 +390,7 @@ if (!$user) {
                                                 <i class="fas fa-history text-info me-2"></i>
                                                 <?php echo htmlspecialchars($activity['action']); ?>
                                                 <?php if (!empty($activity['bug_id'])): ?>
-                                                    <a href="../staff/view_bug.php?id=<?php echo $activity['bug_id']; ?>">
+                                                    <a href="../admin/view_bug.php?id=<?php echo $activity['bug_id']; ?>">
                                                         <?php echo htmlspecialchars($activity['bug_title']); ?>
                                                     </a>
                                                 <?php endif; ?>
