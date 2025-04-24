@@ -83,12 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valid) {
             $user_id = $user['id'];
             $user_name = $user['fullname'];
             log_password_reset_complete($user_id, $user_name);            // Log the password reset in activity_logs
-            if ($user_id) {
-                $action = "Reset password via email link";
-                $log_stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
-                $log_stmt->bind_param("is", $user_id, $action);
-                $log_stmt->execute();
-            }
+
             
             $success_message = 'Your password has been successfully reset. You can now login with your new password.';
             $token_valid = false; // Hide the form

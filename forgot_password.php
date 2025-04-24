@@ -120,10 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $user_id = $user['id'];
                     $user_name = $user['fullname'];
                     log_password_reset_request($user_id, $user_name);                    // Log the activity
-                    $action = "Requested password reset";
-                    $log_stmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, created_at) VALUES (?, ?, NOW())");
-                    $log_stmt->bind_param("is", $user_id, $action);
-                    $log_stmt->execute();
                     
                     $success_message = 'If your email exists in our system, you will receive a password reset link shortly.';
                 } catch (Exception $e) {
