@@ -17,7 +17,61 @@ $user_id = $_SESSION['user_id'];
 $action = safe_get($_GET, 'action', '');
 $bug_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $edit_mode = ($action === 'edit' && $bug_id > 0);
-$new_mode = ($action === 'new');
+$new_mode  = ($action === 'new');
+
+// Delete bug logic
+if ($action === 'delete' && $bug_id > 0) {
+    // Retrieve bug details for file deletion
+    $bug_query = "SELECT screenshot FROM bugs WHERE id = ?";
+    $bug_stmt = $conn->prepare($bug_query);
+    $bug_stmt->bind_param("i", $bug_id);
+    $bug_stmt->execute();
+    $bug_result = $bug_stmt->get_result();
+    
+    if ($bug_result->num_rows === 0) {
+        header('Location: bugs.php');
+        exit();
+    }
+    
+    $bug_data = $bug_result->fetch_assoc();
+    
+    // Delete associated comments
+    $delete_comments = "DELETE FROM comments WHERE bug_id = ?";
+    $stmt_comments = $conn->prepare($delete_comments);
+    $stmt_comments->bind_param("i", $bug_id);
+    $stmt_comments->execute();
+    
+    // Delete bug history
+    $delete_history = "DELETE FROM bug_history WHERE bug_id = ?";
+    $stmt_history = $conn->prepare($delete_history);
+    $stmt_history->bind_param("i", $bug_id);
+    $stmt_history->execute();
+    
+    // Delete associated activity logs
+    $delete_logs = "DELETE FROM activity_logs WHERE bug_id = ?";
+    $stmt_logs = $conn->prepare($delete_logs);
+    $stmt_logs->bind_param("i", $bug_id);
+    $stmt_logs->execute();
+    
+    // Delete the bug record itself
+    $delete_bug = "DELETE FROM bugs WHERE id = ?";
+    $stmt_bug = $conn->prepare($delete_bug);
+    $stmt_bug->bind_param("i", $bug_id);
+    
+    if ($stmt_bug->execute()) {
+        // Delete screenshot file if it exists
+        if (!empty($bug_data['screenshot'])) {
+            $file_path = '../uploads/screenshots/' . $bug_data['screenshot'];
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+        }
+        header('Location: bugs.php?msg=deleted');
+        exit();
+    } else {
+        $errors[] = "Error deleting bug: " . $conn->error;
+    }
+}
 $assign_mode = ($action === 'assign' && $bug_id > 0);
 
 // Initialize variables
