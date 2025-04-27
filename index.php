@@ -184,7 +184,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials-section py-5">
+    <!-- <section class="testimonials-section py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">What Our Users Say</h2>
@@ -257,7 +257,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- CTA Section -->
     <section class="cta-section py-5 bg-primary text-white">
