@@ -34,6 +34,11 @@ $errors = [];
 $success_message = '';
 $bug = []; // Initialize bug array
 
+// Get all staff members for assignment dropdown
+$staff_query = "SELECT id, fullname FROM users WHERE role IN ('admin', 'staff') AND status = 'active' ORDER BY fullname";
+$staff_result = $conn->query($staff_query);
+$staff = $staff_result->fetch_all(MYSQLI_ASSOC);
+
 // If viewing or editing an existing bug
 if ($bug_id > 0) {
     $bug_query = "SELECT b.*, 
@@ -128,6 +133,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Redirect to refresh the page
             header('Location: view_bug.php?id=' . $bug_id);
             exit();
+        }
+    } elseif (isset($_POST['assign_to_staff']) && $bug_id > 0) {
+        // Assign bug to selected staff member
+        $staff_id = isset($_POST['staff_id']) ? (int)$_POST['staff_id'] : 0;
+        
+        if ($staff_id > 0) {
+            $update_query = "UPDATE bugs SET assigned_to = ?, status = 'assigned', updated_at = NOW() WHERE id = ?";
+            $update_stmt = $conn->prepare($update_query);
+            $update_stmt->bind_param("ii", $staff_id, $bug_id);
+            
+            if ($update_stmt->execute()) {
+                // Get staff name for history
+                $staff_name_query = "SELECT fullname FROM users WHERE id = ?";
+                $staff_name_stmt = $conn->prepare($staff_name_query);
+                $staff_name_stmt->bind_param("i", $staff_id);
+                $staff_name_stmt->execute();
+                $staff_name_result = $staff_name_stmt->get_result();
+                $staff_name_row = $staff_name_result->fetch_assoc();
+                $staff_name = safe_get($staff_name_row, 'fullname', 'Unknown');
+                
+                // Log the activity
+                $action_text = "Assigned bug #$ticket_number to $staff_name";
+                // log_action($conn, $user_id, $bug_id, $action_text);
+                
+                // Add to bug history
+                $history_action = "Assigned bug to $staff_name";
+                // add_bug_history($conn, $bug_id, $user_id, $history_action);
+                
+                // Redirect to refresh the page
+                header('Location: view_bug.php?id=' . $bug_id);
+                exit();
+            }
+        } else {
+            $errors[] = "Please select a staff member to assign the bug to.";
         }
     } else {
         // Regular form submission for edit
@@ -386,8 +425,8 @@ if (isset($_POST['add_comment']) && $bug_id > 0) {
                             <div class="mb-3">
                                 <label class="form-label">Screenshot</label>
                                 <div>
-                                    <a href="../uploads/screenshots/<?php echo htmlspecialchars($screenshot); ?>" target="_blank" class="d-inline-block">
-                                        <img src="../uploads/screenshots/<?php echo htmlspecialchars($screenshot); ?>" alt="Bug Screenshot" class="img-thumbnail" style="max-height: 150px;">
+                                    <a href="<?php echo htmlspecialchars($screenshot); ?>" target="_blank" class="d-inline-block">
+                                        <img src="<?php echo htmlspecialchars($screenshot); ?>" alt="Bug Screenshot" class="img-thumbnail" style="max-height: 150px;">
                                     </a>
                                 </div>
                             </div>
@@ -469,19 +508,63 @@ if (isset($_POST['add_comment']) && $bug_id > 0) {
                 </div>
             </div>
             
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Assign Bug</h5>
-                </div>
-                <div class="card-body">
-                    <p>You can assign this bug to yourself to start working on it.</p>
-                    <form method="POST" action="">
-                        <div class="d-grid">
-                            <button type="submit" name="assign_to_me" class="btn btn-success btn-lg">
-                                <i class="fas fa-user-check me-2"></i> Assign to Me
-                            </button>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Assign to Me</h5>
                         </div>
-                    </form>
+                        <div class="card-body">
+                            <p>Assign this bug to yourself to start working on it.</p>
+                            <form method="POST" action="">
+                                <div class="d-grid">
+                                    <button type="submit" name="assign_to_me" class="btn btn-success btn-lg">
+                                        <i class="fas fa-user-check me-2"></i> Assign to Me
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Assign to Another Staff Member</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php if (!empty($errors)): ?>
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        <?php foreach ($errors as $error): ?>
+                                            <li><?php echo htmlspecialchars($error); ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <form method="POST" action="">
+                                <div class="mb-3">
+                                    <label for="staff_id" class="form-label">Select Staff Member</label>
+                                    <select class="form-select" id="staff_id" name="staff_id" required>
+                                        <option value="">-- Select Staff Member --</option>
+                                        <?php foreach ($staff as $staff_member): ?>
+                                            <?php if ($staff_member['id'] != $user_id): ?>
+                                                <option value="<?php echo $staff_member['id']; ?>">
+                                                    <?php echo htmlspecialchars($staff_member['fullname']); ?>
+                                                </option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" name="assign_to_staff" class="btn btn-primary">
+                                        <i class="fas fa-user-plus me-2"></i> Assign Bug
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -581,8 +664,8 @@ if (isset($_POST['add_comment']) && $bug_id > 0) {
                             <?php if (!empty($screenshot)): ?>
                                 <div class="mt-4">
                                     <h5>Screenshot</h5>
-                                    <a href="../uploads/screenshots/<?php echo htmlspecialchars($screenshot); ?>" target="_blank" class="d-inline-block">
-                                        <img src="../uploads/screenshots/<?php echo htmlspecialchars($screenshot); ?>" alt="Bug Screenshot" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">
+                                    <a href="<?php echo htmlspecialchars($screenshot); ?>" target="_blank" class="d-inline-block">
+                                        <img src="<?php echo htmlspecialchars($screenshot); ?>" alt="Bug Screenshot" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">
                                     </a>
                                 </div>
                             <?php endif; ?>
@@ -682,7 +765,7 @@ if (isset($_POST['add_comment']) && $bug_id > 0) {
                     </div>
                     
                     <!-- Quick Actions -->
-                    <div class="card">
+                    <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">Quick Actions</h5>
                         </div>
@@ -741,6 +824,13 @@ if (isset($_POST['add_comment']) && $bug_id > 0) {
                                             <i class="fas fa-user-check me-1"></i> Assign to Me
                                         </button>
                                     </form>
+                                    <a href="view_bug.php?id=<?php echo $bug_id; ?>&action=assign" class="btn btn-primary">
+                                        <i class="fas fa-user-plus me-1"></i> Assign to Staff
+                                    </a>
+                                <?php else: ?>
+                                    <a href="view_bug.php?id=<?php echo $bug_id; ?>&action=assign" class="btn btn-primary">
+                                        <i class="fas fa-user-plus me-1"></i> Reassign Bug
+                                    </a>
                                 <?php endif; ?>
                             </div>
                         </div>

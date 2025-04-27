@@ -8,6 +8,13 @@ if (session_status() === PHP_SESSION_NONE) {
 define('SITE_NAME', 'BugTracker');
 define('SITE_URL', 'https://abdelrhmanadel200.github.io/bug_tracker');
 
+// Email configuration
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_USERNAME', 'booda9963@gmail.com'); // Change to your email
+define('SMTP_PASSWORD', 'bsrl cmwe ckwe wcxd'); // Change to your app password
+define('SMTP_PORT', 587);
+define('SMTP_FROM_EMAIL', 'noreply@bugtracker.com');
+define('SMTP_FROM_NAME', 'BugTracker');
 
 // File upload configuration
 define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB

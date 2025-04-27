@@ -4,9 +4,10 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // Check if customer is logged in
-// if (!is_logged_in() || $_SESSION['role'] == 'customer') {
-//     redirect('../login.php');
-// }
+if (!is_logged_in() || !is_customer()) {
+    redirect('../login.php');
+}
+
 
 // Get user ID
 $user_id = $_SESSION['user_id'];

@@ -2,39 +2,121 @@
 // Include configuration
 require_once 'config/config.php';
 
+// Include PHPMailer classes
+require 'vendor/phpmailer/phpmailer/src/Exception.php';
+require 'vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require 'vendor/phpmailer/phpmailer/src/SMTP.php';
+
+// Import PHPMailer classes into the global namespace
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
 // Check if user is logged in
 $is_logged_in = isset($_SESSION['user_id']);
 $user_email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
 $user_name = isset($_SESSION['fullname']) ? $_SESSION['fullname'] : '';
 
-// Handle form submission
+// Initialize variables
+$name = $is_logged_in ? $user_name : '';
+$email = $is_logged_in ? $user_email : '';
+$subject = '';
+$message = '';
 $success_message = '';
 $error_message = '';
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $subject = isset($_POST['subject']) ? trim($_POST['subject']) : '';
-    $message = isset($_POST['message']) ? trim($_POST['message']) : '';
-    
+    // Get form data and sanitize inputs
+    $name = isset($_POST['name']) ? htmlspecialchars(trim($_POST['name'])) : '';
+    $email = isset($_POST['email']) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : '';
+    $subject = isset($_POST['subject']) ? htmlspecialchars(trim($_POST['subject'])) : '';
+    $message = isset($_POST['message']) ? htmlspecialchars(trim($_POST['message'])) : '';
+
     // Basic validation
     if (empty($name) || empty($email) || empty($subject) || empty($message)) {
         $error_message = 'Please fill in all required fields.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = 'Please enter a valid email address.';
     } else {
-        // In a real application, you would send an email here
-        // For now, we'll just simulate success
-        $success_message = 'Thank you for your message! We will get back to you soon.';
-        
-        // Clear form fields after successful submission
-        $name = $email = $subject = $message = '';
+        // Create a new PHPMailer instance
+        $mail = new PHPMailer(true); // true enables exceptions
+
+        try {
+            // Server settings
+            $mail->isSMTP();                          // Send using SMTP
+            $mail->Host       = 'smtp.gmail.com';     // Set the SMTP server to send through
+            $mail->SMTPAuth   = true;                 // Enable SMTP authentication
+            $mail->Username = 'booda9963@gmail.com'; // SMTP username
+            $mail->Password = 'bsrl cmwe ckwe wcxd'; // SMTP password (use App Password for Gmail)
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
+            $mail->Port       = 587;                  // TCP port to connect to
+
+            // Recipients
+            $mail->setFrom($email, $name);
+            $mail->addAddress('abdelrhmanadel2462005@gmail.com'); // Add a recipient
+            $mail->addReplyTo($email, $name);
+
+            // Content
+            $mail->isHTML(true);                      // Set email format to HTML
+            $mail->Subject = "BugTracker Contact: $subject";
+
+            // Email body
+            $mail->Body = "
+            <html>
+            <head>
+                <title>New Contact Form Submission</title>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    h2 { color: #4361ee; }
+                    .info { margin-bottom: 20px; }
+                    .label { font-weight: bold; }
+                    .message { background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4361ee; }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <h2>New Contact Form Submission</h2>
+                    <div class='info'>
+                        <p><span class='label'>Name:</span> $name</p>
+                        <p><span class='label'>Email:</span> $email</p>
+                        <p><span class='label'>Subject:</span> $subject</p>
+                    </div>
+                    <div class='message'>
+                        <p><span class='label'>Message:</span></p>
+                        <p>" . nl2br($message) . "</p>
+                    </div>
+                    <p>This message was sent from the BugTracker contact form.</p>
+                </div>
+            </body>
+            </html>
+            ";
+
+            // Plain text alternative body
+            $mail->AltBody = "Name: $name\nEmail: $email\nSubject: $subject\n\nMessage:\n$message";
+
+            // Send the email
+            $mail->send();
+            $success_message = 'Thank you for your message! We will get back to you soon.';
+
+            // Clear form fields after successful submission
+            $name = $is_logged_in ? $user_name : '';
+            $email = $is_logged_in ? $user_email : '';
+            $subject = '';
+            $message = '';
+        } catch (Exception $e) {
+            $error_message = "Sorry, there was an error sending your message. Please try again later or contact us directly at abdelrhmanadel2462005@gmail.com. Error: {$mail->ErrorInfo}";
+        }
     }
 }
+
+// Rest of your contact.php file (HTML form, etc.) remains the same
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
     <?php include 'includes/header.php'; ?>
 
@@ -66,42 +149,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-4 p-md-5">
                             <h2 class="fw-bold mb-4">Send Us a Message</h2>
-                            
+
                             <?php if (!empty($success_message)): ?>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <?php echo htmlspecialchars($success_message); ?>
+                                    <?php echo $success_message; ?>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <?php endif; ?>
-                            
+
                             <?php if (!empty($error_message)): ?>
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <?php echo htmlspecialchars($error_message); ?>
+                                    <?php echo $error_message; ?>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             <?php endif; ?>
-                            
-                            <form method="post" action="">
+
+                            <form method="post" action="" id="contactForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="name" class="form-label">Your Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($is_logged_in ? $user_name : ($name ?? '')); ?>" required>
+                                        <input type="text" class="form-control" id="name" name="name" value="<?php echo $name; ?>" required>
+                                        <div class="invalid-feedback">Please enter your name.</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($is_logged_in ? $user_email : ($email ?? '')); ?>" required>
+                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo $email; ?>" required>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="subject" name="subject" value="<?php echo htmlspecialchars($subject ?? ''); ?>" required>
+                                    <input type="text" class="form-control" id="subject" name="subject" value="<?php echo $subject; ?>" required>
+                                    <div class="invalid-feedback">Please enter a subject.</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="message" name="message" rows="6" required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
+                                    <textarea class="form-control" id="message" name="message" rows="6" required><?php echo $message; ?></textarea>
+                                    <div class="invalid-feedback">Please enter your message.</div>
                                 </div>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                        <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true" id="submitSpinner"></span>
+                                        Send Message
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -126,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div>
                                     <h5>Phone</h5>
-                                    <p class="mb-0"><a href="tel:+14155552671" class="text-decoration-none">(415) 555-2671</a></p>
+                                    <p class="mb-0"><a href="tel:+201147533210" class="text-decoration-none">+20 1147533210</a></p>
                                 </div>
                             </div>
                             <div class="d-flex mb-3">
@@ -135,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div>
                                     <h5>Email</h5>
-                                    <p class="mb-0"><a href="mailto:support@bugtracker.com" class="text-decoration-none">support@bugtracker.com</a></p>
+                                    <p class="mb-0"><a href="mailto:abdelrhmanadel2462005@gmail.com" class="text-decoration-none">abdelrhmanadel2462005@gmail.com</a></p>
                                 </div>
                             </div>
                             <div class="d-flex">
@@ -149,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="social-media card border-0 shadow-sm">
                         <div class="card-body p-4">
                             <h3 class="fw-bold mb-4">Connect With Us</h3>
@@ -184,10 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2 class="fw-bold">Find Us</h2>
                 <p class="lead text-muted">Visit our office</p>
             </div>
-            
+
             <div class="map-container rounded shadow">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.0968143067466!2d-122.40058568468176!3d37.78532701975535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858085d2d8fb5d%3A0x4f5e8afd35bace4f!2sSan%20Francisco%2C%20CA%2094107!5e0!3m2!1sen!2sus!4v1617978546234!5m2!1sen!2sus" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1727.9275728072653!2d31.23081447479712!3d29.98359268851981!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2seg!4v1745515230324!5m2!1sen!2seg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>            </div>
         </div>
     </section>
 
@@ -198,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2 class="fw-bold">Frequently Asked Questions</h2>
                 <p class="lead text-muted">Find answers to common questions</p>
             </div>
-            
+
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="accordion" id="faqAccordion">
@@ -258,7 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </h2>
                             <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    We offer support through multiple channels. You can email us at support@bugtracker.com, use the contact form on this page, or access our knowledge base and community forums from your dashboard. Enterprise customers also receive priority support with dedicated account managers.
+                                    We offer support through multiple channels. You can email us at abdelrhmanadel2462005@gmail.com, use the contact form on this page, or access our knowledge base and community forums from your dashboard. Enterprise customers also receive priority support with dedicated account managers.
                                 </div>
                             </div>
                         </div>
@@ -268,18 +357,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/footer-home.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
-    
+
     <style>
         /* Custom styles for the contact page */
         .page-header {
             background-color: var(--bs-primary);
             background-image: linear-gradient(135deg, var(--bs-primary) 0%, #0056b3 100%);
         }
-        
+
         .contact-icon {
             width: 40px;
             height: 40px;
@@ -287,7 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
         }
-        
+
         .social-icon {
             width: 40px;
             height: 40px;
@@ -296,14 +385,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             transition: all 0.3s ease;
         }
-        
+
         .social-icon:hover {
             transform: translateY(-3px);
         }
-        
+
         .map-container {
             overflow: hidden;
         }
     </style>
+
+    <script>
+        // Form validation and submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitSpinner = document.getElementById('submitSpinner');
+
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(event) {
+                    if (!contactForm.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        // Add validation classes
+                        Array.from(contactForm.elements).forEach(input => {
+                            if (input.type !== 'submit' && input.required) {
+                                if (!input.value.trim()) {
+                                    input.classList.add('is-invalid');
+                                } else {
+                                    input.classList.remove('is-invalid');
+                                    input.classList.add('is-valid');
+                                }
+
+                                // Special validation for email
+                                if (input.type === 'email' && input.value.trim()) {
+                                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                    if (!emailRegex.test(input.value.trim())) {
+                                        input.classList.add('is-invalid');
+                                        input.classList.remove('is-valid');
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // Show loading spinner
+                        submitBtn.disabled = true;
+                        submitSpinner.classList.remove('d-none');
+                    }
+                });
+
+                // Remove validation classes on input
+                Array.from(contactForm.elements).forEach(input => {
+                    if (input.type !== 'submit') {
+                        input.addEventListener('input', function() {
+                            if (input.value.trim()) {
+                                input.classList.remove('is-invalid');
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>

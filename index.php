@@ -184,7 +184,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials-section py-5">
+    <!-- <section class="testimonials-section py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">What Our Users Say</h2>
@@ -257,7 +257,7 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- CTA Section -->
     <section class="cta-section py-5 bg-primary text-white">
@@ -268,17 +268,24 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : '';
                     <p class="lead mb-0">Join thousands of teams who trust our platform for their issue management needs.</p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
-                    <?php if (!$is_logged_in): ?>
-                        <a href="register.php" class="btn btn-light btn-lg px-4">Get Started Today</a>
+                <?php if (!$is_logged_in): ?>
+                    <a href="register.php" class="btn btn-light btn-lg px-4 me-md-2">Get Started</a>
                     <?php else: ?>
-                        <a href="<?php echo $user_role; ?>/dashboard.php" class="btn btn-light btn-lg px-4">Go to Dashboard</a>
-                    <?php endif; ?>
+                        <?php if ($user_role === 'admin'): ?>
+                            <a href="admin/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">Admin Dashboard</a>
+                        <?php elseif ($user_role === 'staff'): ?>
+                            <a href="staff/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2">Staff Dashboard</a>
+                        <?php else: ?>
+                            <a href="customer/dashboard.php" class="btn btn-primary btn-lg px-4 me-md-2" style="background-color:aliceblue; color:black;">My Dashboard</a>
+                        <?php endif; ?>
+                        <a href="features.php" class="btn btn-secondary btn-lg px-4">Explore Features</a>
+                        <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/footer-home.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>

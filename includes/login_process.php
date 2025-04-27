@@ -49,9 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Log action
-            log_action('User logged in', $user['id']);
-            
-            // Redirect based on role
+// After successful login
+            $user_id = $user['id'];
+            $user_name = $user['fullname'];
+            log_login($user_id, $user_name);            // Redirect based on role
             switch ($user['role']) {
                 case ROLE_ADMIN:
                     redirect('../admin/dashboard.php');

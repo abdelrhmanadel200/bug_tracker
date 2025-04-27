@@ -211,26 +211,124 @@ function upload_file($file, $destination) {
 }
 
 /**
- * Log an action
+
+ * Log an action in the activity_logs table
  * 
  * @param string $action The action to log
  * @param int $user_id The user ID
- * @param int $bug_id The bug ID (optional)
+ * @param int|null $bug_id The bug ID (optional)
+ * @param string|null $user_name The user name (optional)
  * @return bool True if successful, false otherwise
  */
-function log_action($action, $user_id, $bug_id = null) {
+function log_action($action, $user_id, $bug_id = null, $user_name = null) {
     global $conn;
     
-    $sql = "INSERT INTO activity_logs (user_id, bug_id, action, created_at) VALUES (?, ?, ?, NOW())";
-    $stmt = $conn->prepare($sql);
-    
-    if ($bug_id) {
-        $stmt->bind_param("iis", $user_id, $bug_id, $action);
-    } else {
-        $bug_id = null;
-        $stmt->bind_param("iis", $user_id, $bug_id, $action);
+    // If user_name is not provided but we have user_id, try to fetch the name from database
+    if ($user_name === null && $user_id > 0) {
+        // This is optional - only fetch name if not provided
+        $user_stmt = $conn->prepare("SELECT fullname FROM users WHERE id = ? LIMIT 1");
+        if ($user_stmt) {
+            $user_stmt->bind_param("i", $user_id);
+            $user_stmt->execute();
+            $user_result = $user_stmt->get_result();
+            if ($user_result->num_rows === 1) {
+                $user = $user_result->fetch_assoc();
+                $user_name = $user['fullname'];
+            }
+        }
     }
     
-    return $stmt->execute();
+    // Insert into activity_logs with user_name
+    $sql = "INSERT INTO activity_logs (user_id, user_name, bug_id, action, created_at) VALUES (?, ?, ?, ?, NOW())";
+    $stmt = $conn->prepare($sql);
+    
+    if ($stmt) {
+        $stmt->bind_param("isis", $user_id, $user_name, $bug_id, $action);
+        return $stmt->execute();
+    }
+    
+    return false;
 }
+
+/**
+ * Log user registration activity
+ * 
+ * @param int $user_id The user ID
+ * @param string|null $user_name The user name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_registration($user_id, $user_name = null) {
+    return log_action('User registered', $user_id, null, $user_name);
+}
+
+/**
+ * Log user login activity
+ * 
+ * @param int $user_id The user ID
+ * @param string|null $user_name The user name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_login($user_id, $user_name = null) {
+    return log_action('User logged in', $user_id, null, $user_name);
+}
+
+/**
+ * Log user logout activity
+ * 
+ * @param int $user_id The user ID
+ * @param string|null $user_name The user name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_logout($user_id, $user_name = null) {
+    return log_action('User logged out', $user_id, null, $user_name);
+}
+
+/**
+ * Log password reset request activity
+ * 
+ * @param int $user_id The user ID
+ * @param string|null $user_name The user name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_password_reset_request($user_id, $user_name = null) {
+    return log_action('Requested password reset', $user_id, null, $user_name);
+}
+
+/**
+ * Log password reset completion activity
+ * 
+ * @param int $user_id The user ID
+ * @param string|null $user_name The user name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_password_reset_complete($user_id, $user_name = null) {
+    return log_action('Reset password via email link', $user_id, null, $user_name);
+}
+
+/**
+ * Log user deletion activity
+ * 
+ * @param int $admin_id The admin ID who performed the deletion
+ * @param string $user_info Information about the deleted user
+ * @param string|null $admin_name The admin name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_user_deletion($admin_id, $user_info, $admin_name = null) {
+    return log_action("Deleted user: $user_info", $admin_id, null, $admin_name);
+}
+
+/**
+ * Log user status change activity
+ * 
+ * @param int $admin_id The admin ID who performed the status change
+ * @param int $user_id The user ID whose status was changed
+ * @param string $new_status The new status
+ * @param string $user_name The user's name
+ * @param string|null $admin_name The admin name (optional)
+ * @return bool True if successful, false otherwise
+ */
+function log_user_status_change($admin_id, $user_id, $new_status, $user_name, $admin_name = null) {
+    return log_action("Changed status of user $user_name (ID: $user_id) to $new_status", $admin_id, null, $admin_name);
+}
+
 ?>

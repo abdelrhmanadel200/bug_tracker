@@ -4,9 +4,9 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 // Check if admin is logged in
-// if (!is_logged_in() || $_SESSION['role'] !== 'admin') {
-//     redirect('../login.php');
-// }
+if (!is_logged_in() || !is_admin()) {
+    redirect('../login.php');
+}
 
 // Get user ID from URL
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -114,6 +114,37 @@ $bugs_stmt->bind_param("i", $user_id);
 $bugs_stmt->execute();
 $bugs_result = $bugs_stmt->get_result();
 $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
+
+
+
+// Function to fetch user details by ID
+function getUserById($conn, $id) {
+    $sql = "SELECT * FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc();
+}
+
+// Get user ID from the query string
+$user_id = isset($_GET['id']) ? $_GET['id'] : null;
+
+// If user ID is not provided, redirect to admin dashboard
+if (!$user_id) {
+    header("Location: admin_dashboard.php");
+    exit();
+}
+
+// Fetch user details
+$user = getUserById($conn, $user_id);
+
+// If user does not exist, redirect to admin dashboard
+if (!$user) {
+    header("Location: admin_dashboard.php");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -262,7 +293,6 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                     <select class="form-select" id="status" name="status">
                                         <option value="active" <?php echo $user['status'] === 'active' ? 'selected' : ''; ?>>Active</option>
                                         <option value="inactive" <?php echo $user['status'] === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                                        <option value="suspended" <?php echo $user['status'] === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
                                     </select>
                                 </div>
                             </div>
@@ -270,18 +300,13 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                 <button type="submit" name="update_status" class="btn btn-primary">
                                     <i class="fas fa-save me-1"></i> Update User
                                 </button>
-                                <a href="reset_password.php?id=<?php echo $user_id; ?>" class="btn btn-warning">
-                                    <i class="fas fa-key me-1"></i> Reset Password
+                                <a href="admin_reset_password.php?id=<?php echo $user_id; ?>" class="btn btn-warning">
+                                <i class="fas fa-key me-1"></i> Reset Password
                                 </a>
-                                <?php if ($user['status'] !== 'suspended'): ?>
-                                    <a href="suspend_user.php?id=<?php echo $user_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to suspend this user?');">
-                                        <i class="fas fa-ban me-1"></i> Suspend User
-                                    </a>
-                                <?php else: ?>
-                                    <a href="activate_user.php?id=<?php echo $user_id; ?>" class="btn btn-success">
-                                        <i class="fas fa-check me-1"></i> Activate User
-                                    </a>
-                                <?php endif; ?>
+                              
+                                <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                        <i class="fas fa-trash-alt me-1"></i> Delete User
+                    </a>
                             </div>
                         </form>
                     </div>
@@ -291,7 +316,6 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Recent Bugs</h5>
-                        <a href="user_bugs.php?id=<?php echo $user_id; ?>" class="btn btn-sm btn-light">View All</a>
                     </div>
                     <div class="card-body">
                         <?php if (empty($bugs)): ?>
@@ -334,7 +358,7 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                                 </td>
                                                 <td><?php echo date('M d, Y', strtotime($bug['created_at'])); ?></td>
                                                 <td>
-                                                    <a href="../staff/view_bug.php?id=<?php echo $bug['id']; ?>" class="btn btn-sm btn-info">
+                                                    <a href="../admin/view_bug.php?id=<?php echo $bug['id']; ?>" class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 </td>
@@ -366,7 +390,7 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
                                                 <i class="fas fa-history text-info me-2"></i>
                                                 <?php echo htmlspecialchars($activity['action']); ?>
                                                 <?php if (!empty($activity['bug_id'])): ?>
-                                                    <a href="../staff/view_bug.php?id=<?php echo $activity['bug_id']; ?>">
+                                                    <a href="../admin/view_bug.php?id=<?php echo $activity['bug_id']; ?>">
                                                         <?php echo htmlspecialchars($activity['bug_title']); ?>
                                                     </a>
                                                 <?php endif; ?>
@@ -385,6 +409,29 @@ $bugs = $bugs_result->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm User Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete the user <strong><?php echo htmlspecialchars($user['fullname']); ?></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i> This action cannot be undone. All data associated with this user will be permanently removed.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="delete_user.php?id=<?php echo $user_id; ?>&confirm=yes" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Delete User
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
     <?php include '../includes/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

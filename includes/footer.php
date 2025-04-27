@@ -8,15 +8,17 @@
             <div class="col-md-4">
                 <h5>Quick Links</h5>
                 <ul class="list-unstyled">
-                    <li><a href="index.php" class="text-decoration-none">Home</a></li>
-                    <li><a href="features.php" class="text-decoration-none">Features</a></li>
-                    <li><a href="about.php" class="text-decoration-none">About</a></li>
-                    <li><a href="contact.php" class="text-decoration-none">Contact</a></li>
+                <li><a href="../index.php" class="text-decoration-none">Home</a></li>
+                <li><a href="../features.php" class="text-decoration-none">Features</a></li>
+                <li><a href="../about.php" class="text-decoration-none">About</a></li>
+                <li><a href="../contact.php" class="text-decoration-none">Contact</a></li>
+
+
                 </ul>
             </div>
             <div class="col-md-4">
                 <h5>Contact Us</h5>
-                <p class="small">Email: abdelrhmanadel2462005@gmail.com<br>Phone: +20 1147533210</p>
+                <p class="small">Email: abdelrhmanadel2462005@gmail.com<br>Phone: +201147533210</p>
                 <div class="social-icons">
                     <a href="#" class="text-decoration-none me-2"><i class="fab fa-facebook"></i></a>
                     <a href="#" class="text-decoration-none me-2"><i class="fab fa-twitter"></i></a>

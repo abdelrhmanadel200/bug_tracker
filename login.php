@@ -74,7 +74,7 @@ else if (is_logged_in() && is_customer()) {
                     </form>
                     
                     <div class="text-center mt-3">
-                        <a href="forgot_password.php" class="text-decoration-none">Forgot password?</a>
+                        <a href="forgot_password.php" class="text-decoration-none text-primary">Forgot password?</a>
                     </div>
                     
                     <hr class="my-4">
@@ -87,7 +87,7 @@ else if (is_logged_in() && is_customer()) {
         </div>
     </main>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/footer-home.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>

@@ -283,7 +283,7 @@ $is_logged_in = isset($_SESSION['user_id']);
                             <td class="text-center">
                                 <div class="fw-bold mb-2">Professional</div>
                                 <div class="h4 mb-3">$19<small>/month</small></div>
-                                <a href="register.php" class="btn btn-primary btn-sm">Get Started</a>
+                                <a href="contact.php" class="btn btn-primary btn-sm">Contact Sales</a>
                             </td>
                             <td class="text-center">
                                 <div class="fw-bold mb-2">Enterprise</div>
@@ -316,7 +316,7 @@ $is_logged_in = isset($_SESSION['user_id']);
         </div>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/footer-home.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
