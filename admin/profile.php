@@ -170,7 +170,7 @@ $activities = $activity_result->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-    <?php include '../includes/staff_header.php'; ?>
+    <?php include '../includes/admin_header.php'; ?>
 
     <div class="container py-4">
         <div class="row">
